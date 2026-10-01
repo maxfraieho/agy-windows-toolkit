@@ -4,16 +4,24 @@
     "antigravity": {
       "name": "Antigravity Proxy",
       "type": "anthropic",
-      "base_url": "http://localhost:8080",
+      "base_url": "http://127.0.0.1:8080",
       "api_key": "dummy",
       "models": [
+        {
+          "id": "gemini-3.8-flash-tiered",
+          "name": "Gemini 3.8 Flash (High)"
+        },
         {
           "id": "claude-sonnet-4-6",
           "name": "Claude Sonnet 4.6 (Google AI Pro)"
         },
         {
+          "id": "claude-opus-4-6-thinking",
+          "name": "Claude Opus 4.6 (Thinking)"
+        },
+        {
           "id": "gemini-3-flash",
-          "name": "Gemini 3 Flash (Fast & Lean)"
+          "name": "Gemini 3 Flash (Fast)"
         }
       ]
     }
@@ -21,7 +29,7 @@
   "models": {
     "large": {
       "provider": "antigravity",
-      "model": "claude-sonnet-4-6"
+      "model": "gemini-3.8-flash-tiered"
     },
     "small": {
       "provider": "antigravity",
