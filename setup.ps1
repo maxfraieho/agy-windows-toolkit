@@ -1,62 +1,96 @@
 <#
 .SYNOPSIS
-    Automated turnkey setup for Antigravity CLI Multi-Account Profile Switching on Windows.
+    Turnkey all-in-one deployment script for Antigravity Windows Toolkit.
 .DESCRIPTION
-    Configures NTFS Directory Junctions, isolates user profiles under %USERPROFILE%\.antigravity-profiles,
-    installs switching scripts to %USERPROFILE%\bin, and integrates helper aliases into PowerShell $PROFILE.
+    Installs and configures:
+    1. Antigravity CLI dual-profile isolation (me / son) via NTFS Directory Junctions.
+    2. Antigravity Claude Proxy (Smart Failover, Web UI Dashboard, OAuth Token lifecycle).
+    3. Charm Crush CLI configuration and routing through local proxy.
+    4. PowerShell $PROFILE aliases and helper functions.
+    5. Automatic verification test run.
+.PARAMETER Component
+    Specify 'all', 'agy', 'proxy', 'crush', or 'test'. Defaults to 'all'.
 #>
+
+[CmdletBinding()]
+param(
+    [Parameter(Position = 0)]
+    [ValidateSet("all", "agy", "proxy", "crush", "test")]
+    [string]$Component = "all"
+)
 
 $ErrorActionPreference = "Stop"
 
 $userHome = $env:USERPROFILE
-$baseConfig = "$userHome\.antigravity"
-$profilesDir = "$userHome\.antigravity-profiles"
-$sonDir = "$profilesDir\son"
-$meDir = "$profilesDir\me"
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $binDir = "$userHome\bin"
 
-Write-Host "=== Antigravity Multi-Account Setup ===" -ForegroundColor Cyan
+Write-Host "==========================================================" -ForegroundColor Cyan
+Write-Host "     Antigravity Windows Toolkit - Turnkey Installer      " -ForegroundColor Cyan
+Write-Host "==========================================================" -ForegroundColor Cyan
 
-# 1. Create directory structure
-New-Item -ItemType Directory -Force -Path $sonDir | Out-Null
-New-Item -ItemType Directory -Force -Path $meDir | Out-Null
-New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+function Setup-AgyProfiles {
+    Write-Host "`n[1/4] Configuring Antigravity Multi-Account Profiles..." -ForegroundColor Yellow
+    $baseConfig = "$userHome\.antigravity"
+    $profilesDir = "$userHome\.antigravity-profiles"
+    $sonDir = "$profilesDir\son"
+    $meDir = "$profilesDir\me"
 
-# 2. Preserve existing config into 'son' profile if not already junctioned
-if (Test-Path $baseConfig) {
-    $item = Get-Item $baseConfig
-    if (-not ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
-        Write-Host "Preserving current session into $sonDir..." -ForegroundColor Yellow
-        Copy-Item -Path "$baseConfig\*" -Destination $sonDir -Recurse -Force
-        Remove-Item -Path $baseConfig -Recurse -Force
+    # Create directory structure
+    New-Item -ItemType Directory -Force -Path $sonDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $meDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+
+    # Backup existing session if not a junction
+    if (Test-Path $baseConfig) {
+        $item = Get-Item $baseConfig
+        if (-not ($item.Attributes -band [System.IO.FileAttributes]::ReparsePoint)) {
+            Write-Host "  Preserving existing session into $sonDir..." -ForegroundColor DarkGray
+            Copy-Item -Path "$baseConfig\*" -Destination $sonDir -Recurse -Force
+            Remove-Item -Path $baseConfig -Recurse -Force
+        }
     }
+
+    # Deploy scripts
+    Copy-Item -Path "$scriptDir\scripts\agy-switch.ps1" -Destination "$binDir\agy-switch.ps1" -Force
+    Copy-Item -Path "$scriptDir\scripts\agy-me.cmd" -Destination "$binDir\agy-me.cmd" -Force
+    Copy-Item -Path "$scriptDir\scripts\agy-son.cmd" -Destination "$binDir\agy-son.cmd" -Force
+
+    # Ensure PATH contains binDir
+    $currentPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::User)
+    if ($currentPath -notlike "*$binDir*") {
+        Write-Host "  Adding $binDir to User PATH..." -ForegroundColor DarkGray
+        [Environment]::SetEnvironmentVariable("Path", "$currentPath;$binDir", [EnvironmentVariableTarget]::User)
+        $env:PATH += ";$binDir"
+    }
+
+    # Switch to 'me' by default
+    & "$binDir\agy-switch.ps1" me
+    Write-Host "[OK] Antigravity multi-account profile setup complete." -ForegroundColor Green
 }
 
-# 3. Copy scripts from repository to %USERPROFILE%\bin
-$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-Copy-Item -Path "$scriptDir\scripts\agy-switch.ps1" -Destination "$binDir\agy-switch.ps1" -Force
-Copy-Item -Path "$scriptDir\scripts\agy-me.cmd" -Destination "$binDir\agy-me.cmd" -Force
-Copy-Item -Path "$scriptDir\scripts\agy-son.cmd" -Destination "$binDir\agy-son.cmd" -Force
-
-# 4. Add binDir to User PATH permanently if missing
-$currentPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::User)
-if ($currentPath -notlike "*$binDir*") {
-    Write-Host "Adding $binDir to User PATH..." -ForegroundColor Yellow
-    [Environment]::SetEnvironmentVariable("Path", "$currentPath;$binDir", [EnvironmentVariableTarget]::User)
-    $env:PATH += ";$binDir"
+function Setup-ProxyComponent {
+    Write-Host "`n[2/4] Configuring Antigravity Claude Proxy..." -ForegroundColor Yellow
+    & "$scriptDir\scripts\setup-proxy.ps1"
 }
 
-# 5. Integrate helper functions and aliases into PowerShell $PROFILE
-$profilePath = $PROFILE
-if (-not (Test-Path $profilePath)) {
-    $parentDir = Split-Path -Parent $profilePath
-    if (-not (Test-Path $parentDir)) { New-Item -ItemType Directory -Force -Path $parentDir | Out-Null }
-    New-Item -ItemType File -Force -Path $profilePath | Out-Null
+function Setup-CrushComponent {
+    Write-Host "`n[3/4] Configuring Charm Crush Integration..." -ForegroundColor Yellow
+    & "$scriptDir\scripts\setup-crush.ps1"
 }
 
-$profileAdditions = @"
+function Setup-ShellProfile {
+    Write-Host "`n[4/4] Integrating Aliases into PowerShell Profile..." -ForegroundColor Yellow
+    $profilePath = $PROFILE
+    if (-not (Test-Path $profilePath)) {
+        $parentDir = Split-Path -Parent $profilePath
+        if (-not (Test-Path $parentDir)) { New-Item -ItemType Directory -Force -Path $parentDir | Out-Null }
+        New-Item -ItemType File -Force -Path $profilePath | Out-Null
+    }
 
-# === Antigravity Multi-Account Switcher ===
+    $profileAdditions = @"
+
+# === Antigravity Windows Toolkit Helpers ===
 if (`$env:PATH -notlike "*$binDir*") {
     `$env:PATH += ";$binDir"
 }
@@ -80,18 +114,48 @@ function Show-AgyMenu {
     }
 }
 
-Set-Alias -Name agy-switch -Value Switch-Agy
-Set-Alias -Name agy-sel -Value Show-AgyMenu
-"@
-
-$existingProfile = Get-Content -Path $profilePath -Raw -ErrorAction SilentlyContinue
-if ($existingProfile -notlike "*Antigravity Multi-Account Switcher*") {
-    Add-Content -Path $profilePath -Value $profileAdditions -Encoding UTF8
-    Write-Host "Added aliases (agy-switch, agy-sel) to PowerShell profile." -ForegroundColor Green
+function Start-AgyProxy { & "$binDir\start-proxy.cmd" }
+function Stop-AgyProxy { & "$binDir\stop-proxy.cmd" }
+function Get-AgyProxyStatus {
+    try {
+        `$h = Invoke-RestMethod -Uri "http://localhost:8080/health" -Method Get -TimeoutSec 2
+        `$a = Invoke-RestMethod -Uri "http://localhost:8080/api/accounts" -Method Get -TimeoutSec 2
+        Write-Host "Proxy: RUNNING (v`$(`$h.version)) | Accounts: `$(`$a.summary.available)/`$(`$a.summary.total) available" -ForegroundColor Green
+        Write-Host "Dashboard: http://localhost:8080/" -ForegroundColor Cyan
+    } catch {
+        Write-Host "Proxy: STOPPED or UNREACHABLE" -ForegroundColor Red
+    }
 }
 
-# 6. Switch active junction to 'me'
-& "$binDir\agy-switch.ps1" me
+Set-Alias -Name agy-switch -Value Switch-Agy
+Set-Alias -Name agy-sel -Value Show-AgyMenu
+Set-Alias -Name proxy-start -Value Start-AgyProxy
+Set-Alias -Name proxy-stop -Value Stop-AgyProxy
+Set-Alias -Name proxy-status -Value Get-AgyProxyStatus
+"@
 
-Write-Host "`n[SUCCESS] Setup completed successfully!" -ForegroundColor Green
-Write-Host "Use 'agy-switch' or 'agy-sel' to switch profiles anytime." -ForegroundColor Cyan
+    $existingProfile = Get-Content -Path $profilePath -Raw -ErrorAction SilentlyContinue
+    if ($existingProfile -notlike "*Antigravity Windows Toolkit Helpers*") {
+        Add-Content -Path $profilePath -Value $profileAdditions -Encoding UTF8
+        Write-Host "[OK] Added helper aliases to PowerShell `$PROFILE." -ForegroundColor Green
+    } else {
+        Write-Host "[OK] PowerShell `$PROFILE already configured." -ForegroundColor Green
+    }
+}
+
+# Execution Switch
+switch ($Component) {
+    "all" {
+        Setup-AgyProfiles
+        Setup-ProxyComponent
+        Setup-CrushComponent
+        Setup-ShellProfile
+        & "$scriptDir\scripts\test-pipeline.ps1"
+    }
+    "agy" { Setup-AgyProfiles }
+    "proxy" { Setup-ProxyComponent }
+    "crush" { Setup-CrushComponent }
+    "test" { & "$scriptDir\scripts\test-pipeline.ps1" }
+}
+
+Write-Host "`n[SUCCESS] Setup process finished for target: $Component`n" -ForegroundColor Green

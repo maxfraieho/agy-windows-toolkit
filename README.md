@@ -1,97 +1,178 @@
-# Antigravity CLI Windows Toolkit (`agy-windows-toolkit`)
+# Antigravity Windows Toolkit 🚀
 
-Turnkey multi-account isolation, profile management, and quick switching system for **Google Antigravity CLI (`agy`)** on Windows (PowerShell, CMD, Wave Terminal, and Charmbracelet Crush).
+Complete turnkey automation toolkit for **Google Antigravity CLI (`agy`)**, **Charm Crush CLI (`crush`)**, and **Antigravity Claude Proxy** on Windows 10/11.
+
+Provides automated multi-profile management, smart multi-account load balancing, UTF-8 BOM prevention, and seamless IDE/CLI integration.
 
 ---
 
 ## Architecture Overview
 
-Google Antigravity CLI uses a hybrid authentication mechanism on Windows:
-1. **Windows Credential Manager / DPAPI Keyring:** Refresh tokens are securely persisted in generic credentials under `JetskiService`.
-2. **File-based Session Storage:** Configuration and state reside under `%USERPROFILE%\.antigravity` and `%USERPROFILE%\.gemini\antigravity-cli\`.
+```mermaid
+flowchart TD
+    subgraph Clients["Windows User Environment"]
+        AgyCLI["Antigravity CLI (agy)"]
+        CrushCLI["Charm Crush CLI (crush)"]
+        BrowserUI["Web UI Dashboard\nhttp://localhost:8080"]
+    end
 
-This toolkit establishes clean account separation via **NTFS Directory Junctions** and profile vaults:
+    subgraph ProfileManager["Profile Isolation (NTFS Junctions)"]
+        Junction["C:\Users\vokov\.antigravity"]
+        ProfileMe["Profile: me\n(tukroschu@gmail.com)"]
+        ProfileSon["Profile: son\n(arsen.k111999@gmail.com)"]
+    end
 
-```text
-%USERPROFILE%\
-├── .antigravity ───────────────────► [NTFS Junction] ──► %USERPROFILE%\.antigravity-profiles\me
-├── .antigravity-profiles\
-│   ├── me\                         # Primary profile vault
-│   │   └── antigravity-oauth-token
-│   └── son\                        # Secondary profile vault (e.g. during 48h quota lock)
-│       └── antigravity-oauth-token
-└── bin\
-    ├── agy-switch.ps1              # Core PowerShell profile switcher
-    ├── agy-me.cmd                  # One-click launcher/switch to 'me'
-    └── agy-son.cmd                 # One-click launcher/switch to 'son'
+    subgraph ProxyGateway["Antigravity Claude Proxy (Port 8080)"]
+        Router["Smart Hybrid Strategy\n(Auto-Failover & Health Score)"]
+        TokenRefresher["OAuth Token Lifecycle"]
+    end
+
+    subgraph Upstream["Google CloudCode Pa (Google AI Pro)"]
+        ModelSonnet["Claude 3.5 Sonnet / 4.6"]
+        ModelFlash["Gemini 3 Flash"]
+    end
+
+    AgyCLI -->|Uses NTFS Junction| Junction
+    Junction -.->|Switchable| ProfileMe
+    Junction -.->|Switchable| ProfileSon
+
+    CrushCLI -->|Anthropic API /v1/messages| ProxyGateway
+    BrowserUI -->|REST API /api/accounts| ProxyGateway
+
+    ProxyGateway --> Router
+    Router --> TokenRefresher
+    TokenRefresher -->|tukroschu@gmail.com (Score 967)| Upstream
+    TokenRefresher -.->|arsen.k111999@gmail.com (Score 965)| Upstream
+    Upstream --> ModelSonnet
+    Upstream --> ModelFlash
 ```
 
 ---
 
-## Quick Start / Installation
+## ⚡ Zero-Touch Quickstart (From Scratch)
 
-Run the automated installer in PowerShell:
+Run in PowerShell as your normal user (`vokov`):
 
 ```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+# 1. Clone toolkit repository
+git clone https://github.com/maxfraieho/agy-windows-toolkit.git $HOME\projects\agy-windows-toolkit
+cd $HOME\projects\agy-windows-toolkit
+
+# 2. Run all-in-one setup
 .\setup.ps1
 ```
 
-The script will:
-1. Create the profile vaults (`.antigravity-profiles\me` and `.antigravity-profiles\son`).
-2. Back up any existing session credentials safely.
-3. Deploy the switcher scripts to `%USERPROFILE%\bin` and add it to user `PATH`.
-4. Inject helper aliases and interactive selector menu into PowerShell `$PROFILE`.
+The script will automatically:
+1. Isolate Antigravity CLI into dual profiles (`me` and `son`) using NTFS Junctions.
+2. Deploy `agy-switch.ps1`, `agy-me.cmd`, and `agy-son.cmd` into `%USERPROFILE%\bin`.
+3. Clone, install, and start **Antigravity Claude Proxy** with smart failover.
+4. Configure **Charm Crush** (`crush.json` and `crushrc`) with UTF-8 BOM-free configs.
+5. Register PowerShell `$PROFILE` aliases (`agy-switch`, `agy-sel`, `proxy-start`, `proxy-stop`, `proxy-status`).
+6. Run an automated end-to-end verification pipeline.
 
 ---
 
-## Switching Accounts
+## 🛠️ Included Components
 
-### 1. Via CLI Commands
-* Switch to primary profile:
+### 1. Antigravity CLI Multi-Profile Switcher
+Switch between primary (owner) and secondary accounts in seconds without losing OAuth tokens:
+
+- **Command-line**:
   ```powershell
-  agy-switch me
+  agy-switch me      # Switch active profile to tukroschu@gmail.com
+  agy-switch son     # Switch active profile to arsen.k111999@gmail.com
+  agy-switch status  # Show active profile and target junction
   ```
-* Switch to secondary profile:
+- **Interactive TUI Picker**:
   ```powershell
-  agy-switch son
+  agy-sel            # Displays a 1-click numeric menu
   ```
-* Check active profile status:
+- **Quick CMD Launchers**:
+  `agy-me.cmd` and `agy-son.cmd` for Wave Terminal, Crash, or third-party launchers.
+
+### 2. Antigravity Claude Proxy
+A local reverse proxy bridge listening on `http://localhost:8080`:
+- **Smart Hybrid Account Pooling**: Both accounts are monitored in real time. If one account hits a 429 rate limit or quota lock, requests are automatically routed to the other account.
+- **Web UI Dashboard**: Access [http://localhost:8080/](http://localhost:8080/) to view account quotas, health scores, request logs, and token status.
+- **BOM Protection**: Native UTF-8 BOM stripping to prevent Go/Node.js JSON parsing errors on Windows.
+- **Management Commands**:
   ```powershell
-  agy-switch status
+  proxy-start        # Starts proxy in background
+  proxy-stop         # Stops proxy process on port 8080
+  proxy-status       # Shows health, version, and active account count
   ```
 
-### 2. Via Interactive TUI Menu
-Type:
+### 3. Charm Crush CLI Integration
+Configures Crush to use your Google AI Pro subscription through the proxy:
+- **Large Model (Main)**: `claude-sonnet-4-6` (Anthropic Messages API format)
+- **Small Model (Titles/Fast)**: `gemini-3-flash`
+- **Zero Quota Errors**: Bypasses the 20-request/day free tier limit of `GEMINI_API_KEY`.
+
+---
+
+## 🔍 Verification & Health Check
+
+Run the built-in diagnostic test anytime:
+
 ```powershell
-agy-sel
+.\scripts\test-pipeline.ps1
+# or using PowerShell alias:
+agy-test
 ```
-Select target profile (1: Me, 2: Son, 3: Status).
 
-### 3. Inside Wave Terminal & Charmbracelet Crush
-Launch:
-```cmd
-agy-me
-```
-or
-```cmd
-agy-son
+Sample output:
+```text
+===============================================
+   Antigravity Windows Toolkit Verification
+===============================================
+
+[1/3] Testing Antigravity CLI Profile Setup...
+ [PASS] Junction active: C:\Users\vokov\.antigravity-profiles\me
+ [PASS] Switcher script found at C:\Users\vokov\bin\agy-switch.ps1
+
+[2/3] Testing Antigravity Claude Proxy (Port 8080)...
+ [PASS] Proxy is running. Version: 1.1.0
+ [PASS] Accounts in pool: 2 available / 2 total
+        - tukroschu@gmail.com (Score: 967.4, Pro: pro)
+        - arsen.k111999@gmail.com (Score: 965.0, Pro: pro)
+
+[3/3] Testing Charm Crush CLI Integration...
+ [PASS] Crush binary found: C:\Users\vokov\bin\crush.exe
+ [*] Running test prompt through Crush (Claude Sonnet 4.6 via Proxy)...
+ [PASS] Crush inference succeeded!
+        Response: CRUSH_PROXY_PIPELINE_OK
 ```
 
 ---
 
-## Native Slash Commands Reference
+## 📁 Repository Structure
 
-Inside the running `agy` interactive prompt, you can manage active Google accounts directly:
-
-| Command | Action |
-|---|---|
-| `/logout` | Clears active token from disk and removes the cached credential from Windows Credential Manager. |
-| `/login` | Triggers a fresh Google OAuth browser login flow. |
-| `/exit` | Exits the CLI session. |
+```text
+agy-windows-toolkit/
+├── README.md                          # Documentation and architecture guide
+├── setup.ps1                          # All-in-one turnkey installer
+├── config/
+│   ├── crush/
+│   │   ├── crush.json                 # Crush provider config (BOM-free UTF-8)
+│   │   └── crushrc                    # Crush runtime options
+│   └── proxy/
+│       ├── accounts.template.json     # Clean account pool schema template
+│       └── config.example.json        # Proxy strategy settings
+└── scripts/
+    ├── agy-switch.ps1                 # Core profile switching engine
+    ├── agy-me.cmd                     # Fast wrapper for 'me'
+    ├── agy-son.cmd                    # Fast wrapper for 'son'
+    ├── setup-proxy.ps1                # Proxy installer and service configurator
+    ├── setup-crush.ps1                # Crush config deployment script
+    ├── start-proxy.cmd                # Launcher (background or foreground)
+    ├── start-proxy.vbs                # Silent VBS launcher (no console window)
+    ├── stop-proxy.cmd                 # Graceful terminator
+    └── test-pipeline.ps1              # Full verification pipeline
+```
 
 ---
 
-## License
+## 🛡️ License & Credits
 
-MIT
+- Maintained by [maxfraieho](https://github.com/maxfraieho).
+- Released under MIT License.

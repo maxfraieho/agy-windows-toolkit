@@ -1,0 +1,31 @@
+{
+  "$schema": "https://charm.land/crush.json",
+  "providers": {
+    "antigravity": {
+      "name": "Antigravity Proxy",
+      "type": "anthropic",
+      "base_url": "http://localhost:8080",
+      "api_key": "dummy",
+      "models": [
+        {
+          "id": "claude-sonnet-4-6",
+          "name": "Claude Sonnet 4.6 (Google AI Pro)"
+        },
+        {
+          "id": "gemini-3-flash",
+          "name": "Gemini 3 Flash (Fast & Lean)"
+        }
+      ]
+    }
+  },
+  "models": {
+    "large": {
+      "provider": "antigravity",
+      "model": "claude-sonnet-4-6"
+    },
+    "small": {
+      "provider": "antigravity",
+      "model": "gemini-3-flash"
+    }
+  }
+}
