@@ -41,10 +41,10 @@ if (Test-Path $switchCmd) {
 # 2. Antigravity Claude Proxy Check
 Write-Host "`n[2/3] Testing Antigravity Claude Proxy (Port 8080)..." -ForegroundColor Yellow
 try {
-    $health = Invoke-RestMethod -Uri "http://localhost:8080/health" -Method Get -TimeoutSec 3
+    $health = Invoke-RestMethod -Uri "http://127.0.0.1:8080/health" -Method Get -TimeoutSec 3
     Write-Host " [PASS] Proxy is running. Version: $($health.version)" -ForegroundColor Green
     
-    $accs = Invoke-RestMethod -Uri "http://localhost:8080/api/accounts" -Method Get -TimeoutSec 3
+    $accs = Invoke-RestMethod -Uri "http://127.0.0.1:8080/api/accounts" -Method Get -TimeoutSec 3
     Write-Host " [PASS] Accounts in pool: $($accs.summary.available) available / $($accs.summary.total) total" -ForegroundColor Green
     if ($accs.accounts) {
         $accs.accounts | ForEach-Object {
@@ -52,7 +52,7 @@ try {
         }
     }
 } catch {
-    Write-Host " [FAIL] Proxy is not responding on http://localhost:8080: $_" -ForegroundColor Red
+    Write-Host " [FAIL] Proxy is not responding on http://127.0.0.1:8080: $_" -ForegroundColor Red
 }
 
 # 3. Charm Crush Integration Check

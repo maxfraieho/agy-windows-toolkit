@@ -123,12 +123,12 @@ Write-Host "[*] Launching proxy in background..." -ForegroundColor Yellow
 # 8. Check health
 Start-Sleep -Seconds 2
 try {
-    $health = Invoke-RestMethod -Uri "http://localhost:8080/health" -Method Get -TimeoutSec 5
-    Write-Host "[OK] Antigravity Claude Proxy is HEALTHY on http://localhost:8080" -ForegroundColor Green
+    $health = Invoke-RestMethod -Uri "http://127.0.0.1:8080/health" -Method Get -TimeoutSec 5
+    Write-Host "[OK] Antigravity Claude Proxy is HEALTHY on http://127.0.0.1:8080" -ForegroundColor Green
     Write-Host "     Status: $($health.status), Version: $($health.version)" -ForegroundColor DarkGray
-    Write-Host "     Web UI Dashboard: http://localhost:8080/" -ForegroundColor Cyan
+    Write-Host "     Web UI Dashboard: http://127.0.0.1:8080/" -ForegroundColor Cyan
 } catch {
-    Write-Warning "Could not reach proxy on http://localhost:8080/health. Check logs via: Get-Content '$proxyRepoDir\proxy.log'"
+    Write-Warning "Could not reach proxy on http://127.0.0.1:8080/health. Check logs via: Get-Content '$proxyRepoDir\proxy.log'"
 }
 
 Write-Host "=== Antigravity Claude Proxy setup complete ===`n" -ForegroundColor Green
