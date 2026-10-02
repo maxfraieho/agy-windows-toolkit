@@ -175,15 +175,21 @@ agy-windows-toolkit/
 │   ├── crash.ps1 / crash.cmd          # Primary Edgee launcher with auto-gateway
 │   ├── crash-edgee.ps1 / .cmd         # Explicit Edgee compression runner
 │   ├── crash-raw.ps1 / .cmd           # Offline loopback direct launcher
-│   └── crach.ps1 / .cmd               # Typo-tolerant alias wrappers
+│   ├── crach.ps1 / .cmd               # Typo-tolerant alias wrappers
+│   ├── take-screenshot.ps1 / .cmd     # Automated desktop screenshot utility
+│   └── screenshot_mcp.py              # Stdio MCP server for agent screenshotting
+├── skills/
+│   └── technical-reddit-author/       # High-impact engineering article & post authoring
 ├── config/
 │   ├── crush/
-│   │   ├── crush.json                 # Crush provider config (BOM-free UTF-8)
+│   │   ├── crush.json                 # Aligned Crush config with all 8 MCP servers
 │   │   └── crushrc                    # Crush runtime options
 │   └── proxy/
 │       ├── accounts.template.json     # Clean account pool schema template
 │       └── config.example.json        # Proxy strategy settings
 └── scripts/
+    ├── take-screenshot.ps1 / .cmd     # Screenshot helper scripts
+    ├── screenshot_mcp.py              # MCP server script
     ├── agy-switch.ps1                 # Core profile switching engine
     ├── agy-me.cmd                     # Fast wrapper for 'me'
     ├── agy-son.cmd                    # Fast wrapper for 'son'
