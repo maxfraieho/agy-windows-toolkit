@@ -10,39 +10,48 @@ Provides automated multi-profile management, smart multi-account load balancing,
 
 ```mermaid
 flowchart TD
-    subgraph Clients["Windows User Environment"]
+    subgraph Clients["Windows User Environment (.30)"]
         AgyCLI["Antigravity CLI (agy)"]
-        CrushCLI["Charm Crush CLI (crush)"]
+        CrashCLI["crash / crash-edgee CLI\n(Smart Gateway Auto-Resolver)"]
+        CrushCLI["Charm Crush CLI (v0.97.1)"]
         BrowserUI["Web UI Dashboard\nhttp://localhost:8080"]
     end
 
-    subgraph ProfileManager["Profile Isolation (NTFS Junctions)"]
-        Junction["C:\Users\vokov\.antigravity"]
-        ProfileMe["Profile: me\n(tukroschu@gmail.com)"]
-        ProfileSon["Profile: son\n(arsen.k111999@gmail.com)"]
+    subgraph EdgeeCloud["Edgee AI Gateway Cloud"]
+        EdgeeGateway["Edgee Token Compressor & BYOK Router\n(api.edgee.ai / api.edgee.app)"]
     end
 
-    subgraph ProxyGateway["Antigravity Claude Proxy (Port 8080)"]
+    subgraph IngressNode["Cloudflare Ingress Node (.184)"]
+        CFTunnel["Cloudflare Tunnel\n(antigravity-proxy.exodus.pp.ua)"]
+    end
+
+    subgraph ProxyGateway["Antigravity Claude Proxy (Port 8080 on .30)"]
         Router["Smart Hybrid Strategy\n(Auto-Failover & Health Score)"]
         TokenRefresher["OAuth Token Lifecycle"]
     end
 
-    subgraph Upstream["Google CloudCode Pa (Google AI Pro)"]
+    subgraph Upstream["Google Cloud Code / Antigravity Backend"]
+        ModelGemini["Gemini 3.8 Flash Tiered"]
         ModelSonnet["Claude 3.5 Sonnet / 4.6"]
         ModelFlash["Gemini 3 Flash"]
     end
 
-    AgyCLI -->|Uses NTFS Junction| Junction
-    Junction -.->|Switchable| ProfileMe
-    Junction -.->|Switchable| ProfileSon
-
-    CrushCLI -->|Anthropic API /v1/messages| ProxyGateway
+    AgyCLI -->|NTFS Junction Switcher| ProxyGateway
     BrowserUI -->|REST API /api/accounts| ProxyGateway
+
+    %% Dual Mode Routing
+    CrashCLI -->|Edgee Compression Route| EdgeeGateway
+    EdgeeGateway -->|HTTPS BYOK Ingress| CFTunnel
+    CFTunnel -->|LAN Forwarding .184 -> .30:8080| ProxyGateway
+
+    CrashCLI -.->|Direct Loopback Mode (--raw)| CrushCLI
+    CrushCLI -.->|HTTP 127.0.0.1:8080| ProxyGateway
 
     ProxyGateway --> Router
     Router --> TokenRefresher
-    TokenRefresher -->|tukroschu@gmail.com (Score 967)| Upstream
-    TokenRefresher -.->|arsen.k111999@gmail.com (Score 965)| Upstream
+    TokenRefresher -->|tukroschu@gmail.com (Pro Quota)| Upstream
+    TokenRefresher -.->|arsen.k111999@gmail.com (Fallback)| Upstream
+    Upstream --> ModelGemini
     Upstream --> ModelSonnet
     Upstream --> ModelFlash
 ```
@@ -104,9 +113,18 @@ A local reverse proxy bridge listening on `http://localhost:8080`:
 
 ### 3. Charm Crush CLI Integration
 Configures Crush to use your Google AI Pro subscription through the proxy:
-- **Large Model (Main)**: `claude-sonnet-4-6` (Anthropic Messages API format)
+- **Large Model (Main)**: `gemini-3.8-flash-tiered` / `claude-sonnet-4-6` (High quota, Pro tier)
 - **Small Model (Titles/Fast)**: `gemini-3-flash`
 - **Zero Quota Errors**: Bypasses the 20-request/day free tier limit of `GEMINI_API_KEY`.
+
+### 4. Edgee AI Gateway Integration & `crash` Launcher
+Integrates **Edgee Gateway** (`api.edgee.ai`) for intelligent context compression and BYOK routing:
+- **Lossless Token Pruning**: Strips noisy tool-result logs and dead terminal spans before sending to upstream LLMs.
+- **Smart Disambiguation**: Automatically translates bare model names (`gemini-3.8-flash-tiered`) to provider-scoped identifiers (`edgee/gemini-3.8-flash-tiered`).
+- **Dual Execution Modes**:
+  - `crash` / `crach` / `crash-edgee`: Full Edgee token compression, latency monitoring, and automatic failover (local proxy `:8080` <-> Cloudflare Tunnel).
+  - `crash-raw` / `crush-raw`: Bypasses Edgee completely for direct local loopback (`http://127.0.0.1:8080`) when offline.
+- **Detailed Manual**: See [`docs/EDGEE_ANTIGRAVITY_INTEGRATION.md`](docs/EDGEE_ANTIGRAVITY_INTEGRATION.md) for full architecture blueprints and dashboard setup instructions.
 
 ---
 
@@ -151,6 +169,13 @@ Sample output:
 agy-windows-toolkit/
 ├── README.md                          # Documentation and architecture guide
 ├── setup.ps1                          # All-in-one turnkey installer
+├── docs/
+│   └── EDGEE_ANTIGRAVITY_INTEGRATION.md # End-to-end integration & deployment guide
+├── bin/                               # Direct runtime wrappers (%PATH% drop-in)
+│   ├── crash.ps1 / crash.cmd          # Primary Edgee launcher with auto-gateway
+│   ├── crash-edgee.ps1 / .cmd         # Explicit Edgee compression runner
+│   ├── crash-raw.ps1 / .cmd           # Offline loopback direct launcher
+│   └── crach.ps1 / .cmd               # Typo-tolerant alias wrappers
 ├── config/
 │   ├── crush/
 │   │   ├── crush.json                 # Crush provider config (BOM-free UTF-8)
