@@ -2,28 +2,92 @@
   "$schema": "https://charm.land/crush.json",
   "models": {
     "large": {
-      "provider": "antigravity",
-      "model": "gemini-3.8-flash-tiered"
+      "provider": "edgee",
+      "model": "claude-sonnet-4-6"
     },
     "small": {
-      "provider": "antigravity",
-      "model": "gemini-3-flash"
+      "provider": "edgee",
+      "model": "claude-sonnet-4-6"
     }
   },
+  "recent_models": {
+    "large": [
+      {
+        "model": "claude-sonnet-4-6",
+        "provider": "edgee"
+      },
+      {
+        "model": "gemini-3.8-flash-tiered",
+        "provider": "edgee"
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "provider": "antigravity"
+      },
+      {
+        "model": "gemini-3.8-flash-tiered",
+        "provider": "antigravity"
+      }
+    ]
+  },
+  "permissions": {
+    "allowed_tools": [
+      "bash",
+      "cmd",
+      "powershell",
+      "view",
+      "edit",
+      "write",
+      "glob",
+      "ls",
+      "grep",
+      "sequential-thinking",
+      "screenshot",
+      "gitnexus",
+      "ai-memory",
+      "notebooklm",
+      "bsdd",
+      "n8n"
+    ]
+  },
   "providers": {
-    "antigravity": {
-      "name": "Antigravity Proxy",
-      "type": "anthropic",
-      "base_url": "http://127.0.0.1:8080",
-      "api_key": "dummy",
+    "edgee": {
+      "name": "Edgee Cloud Gateway",
+      "type": "openai-compat",
+      "base_url": "https://api.edgee.ai/v1",
+      "api_key": "sk-edgee-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrIjoiQXNMdFREYklaZzZjZVVWUnd3MEU5OGhkWGxtQVZWUmoifQ.bZ0YIyc_IXNHDeYrRqTu7vWUdnyiAjjicNJqpu6zlUU",
       "models": [
         {
           "id": "gemini-3.8-flash-tiered",
-          "name": "Gemini 3.8 Flash (High)"
+          "name": "Gemini 3.8 Flash (Tiered via Edgee)"
         },
         {
           "id": "claude-sonnet-4-6",
-          "name": "Claude Sonnet 4.6 (Google AI Pro)"
+          "name": "Claude Sonnet 4.6 (Pro via Edgee)"
+        },
+        {
+          "id": "claude-opus-4-6-thinking",
+          "name": "Claude Opus 4.6 (Thinking via Edgee)"
+        },
+        {
+          "id": "gemini-3-flash",
+          "name": "Gemini 3 Flash (Fast via Edgee)"
+        }
+      ]
+    },
+    "antigravity": {
+      "name": "Antigravity Proxy",
+      "type": "openai-compat",
+      "base_url": "http://127.0.0.1:8080/v1",
+      "api_key": "drakon-mcp-2026",
+      "models": [
+        {
+          "id": "gemini-3.8-flash-tiered",
+          "name": "Gemini 3.8 Flash (High Quota)"
+        },
+        {
+          "id": "claude-sonnet-4-6",
+          "name": "Claude Sonnet 4.6 (Pro)"
         },
         {
           "id": "claude-opus-4-6-thinking",
@@ -80,6 +144,13 @@
         "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhYjg1MjVmYy0wYjBhLTQzZDUtYmJmMS02ZjJkNjBiY2M3M2UiLCJpc3MiOiJuOG4iLCJhdWQiOiJtY3Atc2VydmVyLWFwaSIsImp0aSI6ImFmMzhjYzFlLTRlMTEtNGIxZS04NGEwLTZhMzY4OWFlMDI4NiIsImlhdCI6MTc3NjA3NDgyNX0.2sseKoimZzBd70byLWfxBQRD9M41bMFsa7hb6qG_tH8",
         "Accept": "application/json, text/event-stream"
       }
+    },
+    "screenshot": {
+      "type": "stdio",
+      "command": "python",
+      "args": [
+        "C:\\Users\\vokov\\bin\\screenshot_mcp.py"
+      ]
     }
   }
 }

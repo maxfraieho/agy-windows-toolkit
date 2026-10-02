@@ -1,4 +1,4 @@
 @echo off
 set "GEMINI_API_KEY="
 set "GOOGLE_API_KEY="
-"C:\Users\vokov\AppData\Local\Programs\crush\crush.exe" %*
+powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Users\vokov\bin\crash-raw.ps1" %*
