@@ -20,11 +20,7 @@ if ($Arguments) {
 
 # 1. INTERACTIVE TUI MODE: No prompt or arguments supplied
 if ($filteredArgs.Count -eq 0) {
-    if ($isRaw) {
-        & "C:\Users\vokov\AppData\Local\Programs\crush\crush.exe" --yolo
-    } else {
-        & edgee launch crush -- --yolo
-    }
+    & "C:\Users\vokov\AppData\Local\Programs\crush\crush.exe" --yolo
     exit $LASTEXITCODE
 }
 
@@ -42,8 +38,7 @@ if ($firstArg -notin $knownSubcommands -and $firstArg -notlike "-*") {
 $isRun = $filteredArgs -contains "run"
 
 if ($isRun) {
-    if ($isRaw -and (-not ($filteredArgs -contains "-m" -or $filteredArgs -contains "--model"))) {
-        # Default raw non-interactive mode to local antigravity gemini-3-flash
+    if (-not ($filteredArgs -contains "-m" -or $filteredArgs -contains "--model")) {
         $runIndex = [array]::IndexOf($filteredArgs, "run")
         $filteredArgs = @($filteredArgs[0..$runIndex]) + @("-m", "antigravity/gemini-3-flash") + @($filteredArgs[($runIndex + 1)..($filteredArgs.Count - 1)])
     } else {
@@ -55,11 +50,7 @@ if ($isRun) {
                     $modelVal = $modelVal -replace "^(google|anthropic|openai)/", ""
                 }
                 if ($modelVal -notlike "*/*") {
-                    if ($isRaw) {
-                        $filteredArgs[$i + 1] = "antigravity/$modelVal"
-                    } else {
-                        $filteredArgs[$i + 1] = "edgee/$modelVal"
-                    }
+                    $filteredArgs[$i + 1] = "antigravity/$modelVal"
                 } else {
                     $filteredArgs[$i + 1] = $modelVal
                 }
@@ -73,9 +64,9 @@ if ($isRun) {
     }
 }
 
-if ($isRaw) {
-    & "C:\Users\vokov\AppData\Local\Programs\crush\crush.exe" @filteredArgs
-} else {
+$usesEdgee = ($filteredArgs -contains "-m" -or $filteredArgs -contains "--model") -and ($filteredArgs -match "edgee/")
+
+if ($usesEdgee) {
     & edgee launch crush -- @filteredArgs
     if ($LASTEXITCODE -ne 0 -and $isRun) {
         Write-Warning "Edgee gateway call failed (exit code $LASTEXITCODE). Falling back to local Antigravity proxy..."
@@ -91,4 +82,6 @@ if ($isRaw) {
         }
         & "C:\Users\vokov\AppData\Local\Programs\crush\crush.exe" @fallbackArgs
     }
+} else {
+    & "C:\Users\vokov\AppData\Local\Programs\crush\crush.exe" @filteredArgs
 }

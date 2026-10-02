@@ -1,13 +1,13 @@
 {
   "$schema": "https://charm.land/crush.json",
-  "default_provider": "edgee",
+  "default_provider": "antigravity",
   "models": {
     "large": {
-      "provider": "edgee",
+      "provider": "antigravity",
       "model": "gemini-3-flash"
     },
     "small": {
-      "provider": "edgee",
+      "provider": "antigravity",
       "model": "gemini-3-flash"
     }
   },
@@ -15,19 +15,19 @@
     "large": [
       {
         "model": "gemini-3-flash",
-        "provider": "edgee"
+        "provider": "antigravity"
       },
       {
         "model": "gemini-3-flash",
-        "provider": "antigravity"
-      },
-      {
-        "model": "claude-sonnet-4-6",
         "provider": "edgee"
       },
       {
         "model": "claude-sonnet-4-6",
         "provider": "antigravity"
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "provider": "edgee"
       }
     ]
   },
@@ -58,6 +58,30 @@
     ]
   },
   "providers": {
+    "antigravity": {
+      "name": "Antigravity Proxy",
+      "type": "openai-compat",
+      "base_url": "http://127.0.0.1:8080/v1",
+      "api_key": "drakon-mcp-2026",
+      "models": [
+        {
+          "id": "gemini-3-flash",
+          "name": "Gemini 3 Flash (Fast)"
+        },
+        {
+          "id": "claude-sonnet-4-6",
+          "name": "Claude Sonnet 4.6 (Pro)"
+        },
+        {
+          "id": "claude-opus-4-6-thinking",
+          "name": "Claude Opus 4.6 (Thinking)"
+        },
+        {
+          "id": "gemini-3.8-flash-tiered",
+          "name": "Gemini 3.8 Flash (High Quota)"
+        }
+      ]
+    },
     "edgee": {
       "name": "Edgee Cloud Gateway",
       "type": "openai-compat",
@@ -82,30 +106,6 @@
         {
           "id": "gemini-3.8-flash-tiered",
           "name": "Gemini 3.8 Flash (High Quota via Edgee)"
-        }
-      ]
-    },
-    "antigravity": {
-      "name": "Antigravity Proxy",
-      "type": "openai-compat",
-      "base_url": "http://127.0.0.1:8080/v1",
-      "api_key": "drakon-mcp-2026",
-      "models": [
-        {
-          "id": "gemini-3-flash",
-          "name": "Gemini 3 Flash (Fast)"
-        },
-        {
-          "id": "claude-sonnet-4-6",
-          "name": "Claude Sonnet 4.6 (Pro)"
-        },
-        {
-          "id": "claude-opus-4-6-thinking",
-          "name": "Claude Opus 4.6 (Thinking)"
-        },
-        {
-          "id": "gemini-3.8-flash-tiered",
-          "name": "Gemini 3.8 Flash (High Quota)"
         }
       ]
     }

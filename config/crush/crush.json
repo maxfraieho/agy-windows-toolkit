@@ -1,5 +1,6 @@
 {
   "$schema": "https://charm.land/crush.json",
+  "default_provider": "antigravity",
   "models": {
     "large": {
       "provider": "antigravity",
@@ -64,6 +65,33 @@
         {
           "id": "gemini-3.8-flash-tiered",
           "name": "Gemini 3.8 Flash (High Quota)"
+        }
+      ]
+    },
+    "edgee": {
+      "name": "Edgee Cloud Gateway",
+      "type": "openai-compat",
+      "base_url": "https://api.edgee.ai/v1",
+      "api_key": "sk-edgee-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrIjoiQXNMdFREYklaZzZjZVVWUnd3MEU5OGhkWGxtQVZWUmoifQ.bZ0YIyc_IXNHDeYrRqTu7vWUdnyiAjjicNJqpu6zlUU",
+      "extra_headers": {
+        "x-edgee-api-key": "sk-edgee-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrIjoiQXNMdFREYklaZzZjZVVWUnd3MEU5OGhkWGxtQVZWUmoifQ.bZ0YIyc_IXNHDeYrRqTu7vWUdnyiAjjicNJqpu6zlUU"
+      },
+      "models": [
+        {
+          "id": "gemini-3-flash",
+          "name": "Gemini 3 Flash (Fast via Edgee)"
+        },
+        {
+          "id": "claude-sonnet-4-6",
+          "name": "Claude Sonnet 4.6 (Pro via Edgee)"
+        },
+        {
+          "id": "claude-opus-4-6-thinking",
+          "name": "Claude Opus 4.6 (Thinking via Edgee)"
+        },
+        {
+          "id": "gemini-3.8-flash-tiered",
+          "name": "Gemini 3.8 Flash (High Quota via Edgee)"
         }
       ]
     }
