@@ -15,7 +15,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet("all", "agy", "proxy", "crush", "test")]
+    [ValidateSet("all", "agy", "proxy", "laya", "crush", "test")]
     [string]$Component = "all"
 )
 
@@ -74,13 +74,18 @@ function Setup-ProxyComponent {
     & "$scriptDir\scripts\setup-proxy.ps1"
 }
 
+function Setup-LayaComponent {
+    Write-Host "`n[3/5] Configuring Laya Decision Engine..." -ForegroundColor Yellow
+    & "$scriptDir\scripts\setup-laya.ps1"
+}
+
 function Setup-CrushComponent {
-    Write-Host "`n[3/4] Configuring Charm Crush Integration..." -ForegroundColor Yellow
+    Write-Host "`n[4/5] Configuring Charm Crush Integration..." -ForegroundColor Yellow
     & "$scriptDir\scripts\setup-crush.ps1"
 }
 
 function Setup-ShellProfile {
-    Write-Host "`n[4/4] Integrating Aliases into PowerShell Profile..." -ForegroundColor Yellow
+    Write-Host "`n[5/5] Integrating Aliases into PowerShell Profile..." -ForegroundColor Yellow
     $profilePath = $PROFILE
     if (-not (Test-Path $profilePath)) {
         $parentDir = Split-Path -Parent $profilePath
@@ -127,11 +132,25 @@ function Get-AgyProxyStatus {
     }
 }
 
+function Start-LayaEngine { & "$binDir\start-laya.cmd" }
+function Stop-LayaEngine { & "$binDir\stop-laya.cmd" }
+function Get-LayaStatus {
+    try {
+        `$h = Invoke-RestMethod -Uri "http://localhost:9623/health" -Method Get -TimeoutSec 2
+        Write-Host "Laya: RUNNING ($(`$h.model) `$(`$h.version)) on Node: `$(`$h.node)" -ForegroundColor Green
+    } catch {
+        Write-Host "Laya: STOPPED or UNREACHABLE" -ForegroundColor Red
+    }
+}
+
 Set-Alias -Name agy-switch -Value Switch-Agy
 Set-Alias -Name agy-sel -Value Show-AgyMenu
 Set-Alias -Name proxy-start -Value Start-AgyProxy
 Set-Alias -Name proxy-stop -Value Stop-AgyProxy
 Set-Alias -Name proxy-status -Value Get-AgyProxyStatus
+Set-Alias -Name laya-start -Value Start-LayaEngine
+Set-Alias -Name laya-stop -Value Stop-LayaEngine
+Set-Alias -Name laya-status -Value Get-LayaStatus
 "@
 
     $existingProfile = Get-Content -Path $profilePath -Raw -ErrorAction SilentlyContinue
@@ -148,12 +167,14 @@ switch ($Component) {
     "all" {
         Setup-AgyProfiles
         Setup-ProxyComponent
+        Setup-LayaComponent
         Setup-CrushComponent
         Setup-ShellProfile
         & "$scriptDir\scripts\test-pipeline.ps1"
     }
     "agy" { Setup-AgyProfiles }
     "proxy" { Setup-ProxyComponent }
+    "laya" { Setup-LayaComponent }
     "crush" { Setup-CrushComponent }
     "test" { & "$scriptDir\scripts\test-pipeline.ps1" }
 }

@@ -10,22 +10,21 @@ Provides automated multi-profile management, smart multi-account load balancing,
 
 ```mermaid
 flowchart TD
-    subgraph Clients["Windows User Environment (.30)"]
+    subgraph Clients["Windows Workstation (.30)"]
         AgyCLI["Antigravity CLI (agy)"]
-        CrashCLI["crash / crash-edgee CLI\n(Smart Gateway Auto-Resolver)"]
+        CrashCLI["crash CLI\n(Direct Proxy Runner)"]
         CrushCLI["Charm Crush CLI (v0.97.1)"]
         BrowserUI["Web UI Dashboard\nhttp://localhost:8080"]
+        LocalLaya["Laya Decision Engine (Port 9623)\nmmBERT-base-322M (Sub-1ms Local)"]
     end
 
-    subgraph EdgeeCloud["Edgee AI Gateway Cloud"]
-        EdgeeGateway["Edgee Token Compressor & BYOK Router\n(api.edgee.ai / api.edgee.app)"]
-    end
-
-    subgraph IngressNode["Cloudflare Ingress Node (.184)"]
-        CFTunnel["Cloudflare Tunnel\n(antigravity-proxy.exodus.pp.ua)"]
+    subgraph PhoneNode["Pixel 7 Podroid Node (.251)"]
+        RemoteLaya["Laya Decision Engine (Port 9623)\n(Dual-Node Fallback Target)"]
     end
 
     subgraph ProxyGateway["Antigravity Claude Proxy (Port 8080 on .30)"]
+        NativeComp["Native Token Compressor\n• Tool Result Trimming (<4k)\n• Schema Pruning\n• System Brevity Directive"]
+        LayaBridge["Laya Decision & Triage Bridge\n• 5-Line Stack Trace Capsule\n• Sub-40ms Skill Reranking"]
         Router["Smart Hybrid Strategy\n(Auto-Failover & Health Score)"]
         TokenRefresher["OAuth Token Lifecycle"]
     end
@@ -38,16 +37,15 @@ flowchart TD
 
     AgyCLI -->|NTFS Junction Switcher| ProxyGateway
     BrowserUI -->|REST API /api/accounts| ProxyGateway
+    CrashCLI -->|Direct Loopback| CrushCLI
+    CrushCLI -->|HTTP 127.0.0.1:8080| ProxyGateway
 
-    %% Dual Mode Routing
-    CrashCLI -->|Edgee Compression Route| EdgeeGateway
-    EdgeeGateway -->|HTTPS BYOK Ingress| CFTunnel
-    CFTunnel -->|LAN Forwarding .184 -> .30:8080| ProxyGateway
+    ProxyGateway --> NativeComp
+    NativeComp --> LayaBridge
+    LayaBridge -->|Primary: 127.0.0.1:9623| LocalLaya
+    LayaBridge -.->|Fallback: 192.168.3.251:9623| RemoteLaya
 
-    CrashCLI -.->|Direct Loopback Mode (--raw)| CrushCLI
-    CrushCLI -.->|HTTP 127.0.0.1:8080| ProxyGateway
-
-    ProxyGateway --> Router
+    NativeComp --> Router
     Router --> TokenRefresher
     TokenRefresher -->|tukroschu@gmail.com (Pro Quota)| Upstream
     TokenRefresher -.->|arsen.k111999@gmail.com (Fallback)| Upstream
@@ -117,14 +115,20 @@ Configures Crush to use your Google AI Pro subscription through the proxy:
 - **Small Model (Titles/Fast)**: `gemini-3-flash`
 - **Zero Quota Errors**: Bypasses the 20-request/day free tier limit of `GEMINI_API_KEY`.
 
-### 4. Edgee AI Gateway Integration & `crash` Launcher
-Integrates **Edgee Gateway** (`api.edgee.ai`) for intelligent context compression and BYOK routing:
-- **Lossless Token Pruning**: Strips noisy tool-result logs and dead terminal spans before sending to upstream LLMs.
-- **Smart Disambiguation**: Automatically translates bare model names (`gemini-3.8-flash-tiered`) to provider-scoped identifiers (`edgee/gemini-3.8-flash-tiered`).
-- **Dual Execution Modes**:
-  - `crash` / `crach` / `crash-edgee`: Full Edgee token compression, latency monitoring, and automatic failover (local proxy `:8080` <-> Cloudflare Tunnel).
-  - `crash-raw` / `crush-raw`: Bypasses Edgee completely for direct local loopback (`http://127.0.0.1:8080`) when offline.
-- **Detailed Manual**: See [`docs/EDGEE_ANTIGRAVITY_INTEGRATION.md`](docs/EDGEE_ANTIGRAVITY_INTEGRATION.md) for full architecture blueprints and dashboard setup instructions.
+### 4. Laya Decision Engine & Native Token Compression
+Replaces external gateways with high-speed local processing and 0-overhead token optimization:
+- **Native Context Pruning**: Embedded directly into `antigravity-claude-proxy` on `:8080`:
+  - Strips noisy tool-result logs and dead terminal spans (capped at 4,000 chars per result).
+  - Trims tool definitions and injects system brevity directives without network latency.
+- **Laya Decision Engine (`mmBERT-base-322M`)**:
+  - Runs locally on Windows workstation (`http://127.0.0.1:9623`) with sub-1ms response times.
+  - Automatic dual-node fallback to Pixel 7 Podroid (`http://192.168.3.251:9623`).
+  - Converts verbose Python/pytest error stack traces into concise 5-line diagnostic capsules (`[ERROR_TRIAGE: ...]`), saving 80–95% of tokens on test failures.
+  - Non-autoregressive sub-40ms candidate reranking and domain risk classification.
+- **`crash` CLI Launcher**:
+  - Direct local pipeline runner: auto-injects `--yolo`, defaults model to `antigravity/gemini-3-flash`, and runs via local proxy `:8080` with zero external dependencies.
+- **Service Autostart**:
+  - `AntigravityProxy` (port 8080) and `LayaDecisionEngine` (port 9623) are automatically registered as Windows Scheduled Tasks starting at user logon.
 
 ---
 
@@ -172,12 +176,17 @@ agy-windows-toolkit/
 ├── docs/
 │   └── EDGEE_ANTIGRAVITY_INTEGRATION.md # End-to-end integration & deployment guide
 ├── bin/                               # Direct runtime wrappers (%PATH% drop-in)
-│   ├── crash.ps1 / crash.cmd          # Primary Edgee launcher with auto-gateway
-│   ├── crash-edgee.ps1 / .cmd         # Explicit Edgee compression runner
-│   ├── crash-raw.ps1 / .cmd           # Offline loopback direct launcher
+│   ├── crash.ps1 / crash.cmd          # Primary direct proxy runner
+│   ├── crash-edgee.ps1 / .cmd         # Deprecated alias redirecting to crash
+│   ├── crash-raw.ps1 / .cmd           # Direct loopback runner
 │   ├── crach.ps1 / .cmd               # Typo-tolerant alias wrappers
 │   ├── take-screenshot.ps1 / .cmd     # Automated desktop screenshot utility
-│   └── screenshot_mcp.py              # Stdio MCP server for agent screenshotting
+│   ├── screenshot_mcp.py              # Stdio MCP server for agent screenshotting
+│   ├── setup-laya.ps1                 # Laya Decision Engine installer & autostart setup
+│   └── laya/                          # Laya daemon and control scripts
+│       ├── laya_daemon.py             # REST daemon (port 9623)
+│       ├── start-laya.cmd / .vbs      # Silent background launcher
+│       └── stop-laya.cmd              # Graceful terminator
 ├── skills/
 │   └── technical-reddit-author/       # High-impact engineering article & post authoring
 ├── config/
@@ -188,6 +197,8 @@ agy-windows-toolkit/
 │       ├── accounts.template.json     # Clean account pool schema template
 │       └── config.example.json        # Proxy strategy settings
 └── scripts/
+    ├── setup-laya.ps1                 # Laya deployment script
+    ├── laya/                          # Laya daemon components
     ├── take-screenshot.ps1 / .cmd     # Screenshot helper scripts
     ├── screenshot_mcp.py              # MCP server script
     ├── agy-switch.ps1                 # Core profile switching engine

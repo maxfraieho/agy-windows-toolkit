@@ -2,6 +2,11 @@
 
 Complete architectural reference, dashboard setup guide, and operational manual for connecting **Charm Crush CLI**, **Edgee AI Agent Gateway** (with lossless context compression), **Cloudflare Tunnels**, and the self-hosted **Antigravity Claude Proxy** with Google AI Studio / Cloud Code multi-account pooling.
 
+> [!IMPORTANT]
+> **ARCHITECTURAL DECISION RECORD (ADR-016): EDGEE SUPERSEDED BY NATIVE PROXY COMPRESSION & LAYA DECISION ENGINE**
+> Based on empirical deep research into Edgee's proprietary cloud routing constraints (mandatory vendor key mapping, catalog restrictions, and enterprise commercial license gating on on-prem containers), the external Edgee cloud layer has been **completely excised**.
+> Token pruning (tool output truncation, schema pruning, system brevity) has been natively built into `antigravity-claude-proxy` (`:8080`), and fast non-autoregressive triage & decision routing is handled directly by **Laya Decision Engine** (`:9623`) on localhost with zero external dependencies. This document is retained for historical and comparative reference.
+
 ---
 
 ## 1. Executive Summary

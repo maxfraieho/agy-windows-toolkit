@@ -1,10 +1,9 @@
 @echo off
-set "EDGEE_API_KEY=sk-edgee-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrIjoib0UwcVhmYWR6eGp3MjFTZzdHY2dsdllYVHRDaFk4S1AifQ.7IAMKo5guMeJ8aO_TxUeDO6wvuNyvQokjwF-ngNG8qE"
+setlocal
 set "GEMINI_API_KEY="
 set "GOOGLE_API_KEY="
-set "EDGEE_API_URL=http://127.0.0.1:8080"
 
-if "%1"=="--raw" (
+if /i "%~1"=="--raw" (
     shift
     "C:\Users\vokov\AppData\Local\Programs\crush\crush.exe" %*
 ) else (

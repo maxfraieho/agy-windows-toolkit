@@ -5,9 +5,9 @@ param(
     [string[]]$Arguments
 )
 
-$env:EDGEE_API_KEY = "sk-edgee-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrIjoiQXNMdFREYklaZzZjZVVWUnd3MEU5OGhkWGxtQVZWUmoifQ.bZ0YIyc_IXNHDeYrRqTu7vWUdnyiAjjicNJqpu6zlUU"
 $env:GEMINI_API_KEY = $null
 $env:GOOGLE_API_KEY = $null
+$env:EDGEE_API_KEY = $null
 $env:EDGEE_API_URL = $null
 
 $isRaw = $Raw -or ($Arguments -contains "--raw")
@@ -38,6 +38,8 @@ if ($firstArg -notin $knownSubcommands -and $firstArg -notlike "-*") {
 $isRun = $filteredArgs -contains "run"
 
 if ($isRun) {
+    # Ensure --yolo is stripped if accidentally passed to 'run' subcommand
+    $filteredArgs = @($filteredArgs | Where-Object { $_ -ne "--yolo" -and $_ -ne "-y" })
     if (-not ($filteredArgs -contains "-m" -or $filteredArgs -contains "--model")) {
         $runIndex = [array]::IndexOf($filteredArgs, "run")
         $filteredArgs = @($filteredArgs[0..$runIndex]) + @("-m", "antigravity/gemini-3-flash") + @($filteredArgs[($runIndex + 1)..($filteredArgs.Count - 1)])
@@ -46,8 +48,8 @@ if ($isRun) {
             if ($filteredArgs[$i] -in @("-m", "--model") -and ($i + 1) -lt $filteredArgs.Count) {
                 $modelVal = $filteredArgs[$i + 1]
                 # Strip accidental upstream provider prefixes
-                if ($modelVal -match "^(google|anthropic|openai)/") {
-                    $modelVal = $modelVal -replace "^(google|anthropic|openai)/", ""
+                if ($modelVal -match "^(google|anthropic|openai|edgee)/") {
+                    $modelVal = $modelVal -replace "^(google|anthropic|openai|edgee)/", ""
                 }
                 if ($modelVal -notlike "*/*") {
                     $filteredArgs[$i + 1] = "antigravity/$modelVal"
@@ -64,24 +66,9 @@ if ($isRun) {
     }
 }
 
-$usesEdgee = ($filteredArgs -contains "-m" -or $filteredArgs -contains "--model") -and ($filteredArgs -match "edgee/")
-
-if ($usesEdgee) {
-    & edgee launch crush -- @filteredArgs
-    if ($LASTEXITCODE -ne 0 -and $isRun) {
-        Write-Warning "Edgee gateway call failed (exit code $LASTEXITCODE). Falling back to local Antigravity proxy..."
-        $fallbackArgs = @($filteredArgs)
-        for ($i = 0; $i -lt $fallbackArgs.Count; $i++) {
-            if ($fallbackArgs[$i] -in @("-m", "--model") -and ($i + 1) -lt $fallbackArgs.Count) {
-                $fallbackArgs[$i + 1] = $fallbackArgs[$i + 1] -replace "^edgee/", "antigravity/"
-            }
-        }
-        if (-not ($fallbackArgs -contains "-m" -or $fallbackArgs -contains "--model")) {
-            $runIdx = [array]::IndexOf($fallbackArgs, "run")
-            $fallbackArgs = @($fallbackArgs[0..$runIdx]) + @("-m", "antigravity/gemini-3-flash") + @($fallbackArgs[($runIdx + 1)..($fallbackArgs.Count - 1)])
-        }
-        & "C:\Users\vokov\AppData\Local\Programs\crush\crush.exe" @fallbackArgs
-    }
+if ($isRun) {
+    $null | & "C:\Users\vokov\AppData\Local\Programs\crush\crush.exe" @filteredArgs
 } else {
     & "C:\Users\vokov\AppData\Local\Programs\crush\crush.exe" @filteredArgs
 }
+exit $LASTEXITCODE
