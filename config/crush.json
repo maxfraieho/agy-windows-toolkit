@@ -73,14 +73,6 @@
         "Accept": "application/json, text/event-stream"
       }
     },
-    "drakon": {
-      "type": "http",
-      "url": "https://drakon-antigravity-worker.maxfraieho.workers.dev/mcp",
-      "headers": {
-        "Authorization": "Bearer drakon-mcp-2026",
-        "Accept": "application/json, text/event-stream"
-      }
-    },
     "n8n": {
       "type": "http",
       "url": "https://n8n.exodus.pp.ua/mcp-server/http",

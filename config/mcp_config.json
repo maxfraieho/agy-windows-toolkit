@@ -22,14 +22,6 @@
         "Accept": "application/json, text/event-stream"
       }
     },
-    "drakon": {
-      "type": "http",
-      "url": "https://drakon-antigravity-worker.maxfraieho.workers.dev/mcp",
-      "headers": {
-        "Authorization": "Bearer drakon-mcp-2026",
-        "Accept": "application/json, text/event-stream"
-      }
-    },
     "bsdd": {
       "type": "http",
       "url": "http://192.168.3.161:8765/mcp",
