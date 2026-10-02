@@ -5,7 +5,7 @@ param(
     [string[]]$Arguments
 )
 
-$env:EDGEE_API_KEY = "sk-edgee-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrIjoib0UwcVhmYWR6eGp3MjFTZzdHY2dsdllYVHRDaFk4S1AifQ.7IAMKo5guMeJ8aO_TxUeDO6wvuNyvQokjwF-ngNG8qE"
+$env:EDGEE_API_KEY = "sk-edgee-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrIjoiQXNMdFREYklaZzZjZVVWUnd3MEU5OGhkWGxtQVZWUmoifQ.bZ0YIyc_IXNHDeYrRqTu7vWUdnyiAjjicNJqpu6zlUU"
 $env:GEMINI_API_KEY = $null
 $env:GOOGLE_API_KEY = $null
 $env:EDGEE_API_URL = $null
@@ -23,12 +23,18 @@ if ($filteredArgs.Count -gt 0) {
 for ($i = 0; $i -lt $filteredArgs.Count; $i++) {
     if ($filteredArgs[$i] -in @("-m", "--model") -and ($i + 1) -lt $filteredArgs.Count) {
         $modelVal = $filteredArgs[$i + 1]
+        # Strip accidental upstream provider prefixes like google/, anthropic/, openai/
+        if ($modelVal -match "^(google|anthropic|openai)/") {
+            $modelVal = $modelVal -replace "^(google|anthropic|openai)/", ""
+        }
         if ($modelVal -notlike "*/*") {
             if ($isRaw) {
                 $filteredArgs[$i + 1] = "antigravity/$modelVal"
             } else {
                 $filteredArgs[$i + 1] = "edgee/$modelVal"
             }
+        } else {
+            $filteredArgs[$i + 1] = $modelVal
         }
     }
 }
