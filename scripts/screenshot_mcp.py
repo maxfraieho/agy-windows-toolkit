@@ -127,16 +127,18 @@ def handle_request(req):
 
 def main():
     while True:
-        line = sys.stdin.readline()
-        if not line:
-            break
-        line = line.strip()
-        if not line:
-            continue
         try:
+            line = sys.stdin.readline()
+            if not line:
+                sys.exit(0)
+            line = line.strip()
+            if not line:
+                continue
             req = json.loads(line)
             handle_request(req)
-        except Exception as e:
+        except (KeyboardInterrupt, SystemExit):
+            sys.exit(0)
+        except Exception:
             pass
 
 if __name__ == "__main__":
