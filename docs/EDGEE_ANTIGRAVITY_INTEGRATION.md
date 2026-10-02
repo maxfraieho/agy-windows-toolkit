@@ -289,6 +289,23 @@ ingress:
   - service: http_status:404
 ```
 
+### 5.4 Troubleshooting Empty Bubbles & Streaming Tool Call Failures
+
+#### Symptom: Empty Response Bubbles on Action Prompts
+In Charm Crush, simple text greetings (e.g. "привіт") responded immediately in 3-4s, but any prompt requiring shell/tool actions (e.g. `mkdir ...`) resulted in a response duration of 5-6s with an **empty response bubble** (zero output).
+
+#### Root Cause Analysis
+1. **Tool Calls Dropped in `/v1/chat/completions`**: `antigravity-claude-proxy` was originally designed for Anthropic `/v1/messages`. Its preliminary `/v1/chat/completions` route only checked `event.delta?.text` during SSE streaming. When upstream Gemini/Claude produced a `tool_use` event (`content_block_start` with `tool_use` and `content_block_delta` with `input_json_delta`), the proxy dropped these events completely and emitted an empty closing chunk with `finish_reason: "stop"` instead of `"tool_calls"`.
+2. **Missing Multi-Turn Tool Resolution**: In multi-turn dialogues, OpenAI sends `{ role: 'tool', tool_call_id, content }`. The proxy previously cast this to `{ role: 'user', content }` without wrapping it in an Anthropic `tool_result` block, breaking subsequent agent iterations.
+3. **MCP Initialization Failures**: An outdated Cloudflare worker endpoint (`drakon-antigravity-worker.maxfraieho.workers.dev/mcp`) returned HTTP 401 on startup, spamming sidebar errors. All Drakon functionality was already natively served by the local `bsdd` MCP server (`192.168.3.161:8765/mcp`).
+
+#### Resolution Implemented
+- **OpenAI Streaming Tool Calls**: Patched `src/server.js` in `antigravity-claude-proxy` to convert Anthropic SSE blocks (`content_block_start` -> `delta.tool_calls`, `input_json_delta` -> `arguments`, and `message_delta` -> `finish_reason: "tool_calls"`).
+- **Reasoning Content Streaming**: Added `reasoning_content` delta streaming so Gemini thinking/reasoning blocks stream into Crush's thinking UI.
+- **Empty Text Fallback**: If a model generates thought blocks without final text/tools, proxy falls back to the thought text rather than emitting an empty bubble.
+- **Crush Permissions**: Added `permissions.allowed_tools` in `crush.json` to enable automated non-interactive execution of tools without freezing for CLI input.
+- **MCP Cleanliness**: Removed dead `drakon` endpoint from `crush.json` across all configurations.
+
 ---
 
 ## 6. Section E: Community Discussion & Reddit Publication Draft

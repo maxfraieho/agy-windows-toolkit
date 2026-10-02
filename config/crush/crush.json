@@ -22,6 +22,26 @@
       }
     ]
   },
+  "permissions": {
+    "allowed_tools": [
+      "bash",
+      "cmd",
+      "powershell",
+      "view",
+      "edit",
+      "write",
+      "glob",
+      "ls",
+      "grep",
+      "sequential-thinking",
+      "screenshot",
+      "gitnexus",
+      "ai-memory",
+      "notebooklm",
+      "bsdd",
+      "n8n"
+    ]
+  },
   "providers": {
     "antigravity": {
       "name": "Antigravity Proxy",
@@ -82,14 +102,6 @@
       "type": "http",
       "url": "http://192.168.3.161:8765/mcp",
       "headers": {
-        "Accept": "application/json, text/event-stream"
-      }
-    },
-    "drakon": {
-      "type": "http",
-      "url": "https://drakon-antigravity-worker.maxfraieho.workers.dev/mcp",
-      "headers": {
-        "Authorization": "Bearer drakon-mcp-2026",
         "Accept": "application/json, text/event-stream"
       }
     },
