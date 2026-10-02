@@ -138,8 +138,9 @@ def main():
             handle_request(req)
         except (KeyboardInterrupt, SystemExit):
             sys.exit(0)
-        except Exception:
-            pass
+        except Exception as e:
+            sys.stderr.write(f"Screenshot MCP error: {e}\n")
+            sys.stderr.flush()
 
 if __name__ == "__main__":
     main()
