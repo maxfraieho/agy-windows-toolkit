@@ -1,46 +1,53 @@
 {
   "$schema": "https://charm.land/crush.json",
+  "default_provider": "edgee",
   "models": {
     "large": {
       "provider": "edgee",
-      "model": "claude-sonnet-4-6"
+      "model": "gemini-3.8-flash-tiered"
     },
     "small": {
       "provider": "edgee",
-      "model": "claude-sonnet-4-6"
+      "model": "gemini-3.8-flash-tiered"
     }
   },
   "recent_models": {
     "large": [
       {
-        "model": "claude-sonnet-4-6",
-        "provider": "edgee"
-      },
-      {
         "model": "gemini-3.8-flash-tiered",
         "provider": "edgee"
       },
       {
-        "model": "claude-sonnet-4-6",
+        "model": "gemini-3.8-flash-tiered",
         "provider": "antigravity"
       },
       {
-        "model": "gemini-3.8-flash-tiered",
+        "model": "claude-sonnet-4-6",
+        "provider": "edgee"
+      },
+      {
+        "model": "claude-sonnet-4-6",
         "provider": "antigravity"
       }
     ]
   },
   "permissions": {
     "allowed_tools": [
+      "*",
       "bash",
       "cmd",
       "powershell",
+      "terminal",
       "view",
       "edit",
       "write",
       "glob",
       "ls",
       "grep",
+      "read",
+      "file",
+      "download",
+      "fetch",
       "sequential-thinking",
       "screenshot",
       "gitnexus",
@@ -56,10 +63,13 @@
       "type": "openai-compat",
       "base_url": "https://api.edgee.ai/v1",
       "api_key": "sk-edgee-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrIjoiQXNMdFREYklaZzZjZVVWUnd3MEU5OGhkWGxtQVZWUmoifQ.bZ0YIyc_IXNHDeYrRqTu7vWUdnyiAjjicNJqpu6zlUU",
+      "extra_headers": {
+        "x-edgee-api-key": "sk-edgee-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrIjoiQXNMdFREYklaZzZjZVVWUnd3MEU5OGhkWGxtQVZWUmoifQ.bZ0YIyc_IXNHDeYrRqTu7vWUdnyiAjjicNJqpu6zlUU"
+      },
       "models": [
         {
           "id": "gemini-3.8-flash-tiered",
-          "name": "Gemini 3.8 Flash (Tiered via Edgee)"
+          "name": "Gemini 3.8 Flash (High Quota via Edgee)"
         },
         {
           "id": "claude-sonnet-4-6",
