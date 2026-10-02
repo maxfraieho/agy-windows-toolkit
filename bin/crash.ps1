@@ -8,20 +8,7 @@ param(
 $env:EDGEE_API_KEY = "sk-edgee-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrIjoib0UwcVhmYWR6eGp3MjFTZzdHY2dsdllYVHRDaFk4S1AifQ.7IAMKo5guMeJ8aO_TxUeDO6wvuNyvQokjwF-ngNG8qE"
 $env:GEMINI_API_KEY = $null
 $env:GOOGLE_API_KEY = $null
-
-try {
-    $tcp = New-Object System.Net.Sockets.TcpClient
-    $iar = $tcp.BeginConnect("127.0.0.1", 8080, $null, $null)
-    if ($iar.AsyncWaitHandle.WaitOne(200, $false) -and $tcp.Connected) {
-        $env:EDGEE_API_URL = "http://127.0.0.1:8080"
-        $tcp.EndConnect($iar)
-    } else {
-        $env:EDGEE_API_URL = "https://antigravity-proxy.exodus.pp.ua"
-    }
-    $tcp.Close()
-} catch {
-    $env:EDGEE_API_URL = "https://antigravity-proxy.exodus.pp.ua"
-}
+$env:EDGEE_API_URL = $null
 
 $isRaw = $Raw -or ($Arguments -contains "--raw")
 $filteredArgs = @($Arguments | Where-Object { $_ -ne "--raw" })
