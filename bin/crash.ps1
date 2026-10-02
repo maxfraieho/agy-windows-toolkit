@@ -11,17 +11,32 @@ $env:GOOGLE_API_KEY = $null
 $env:EDGEE_API_URL = $null
 
 $isRaw = $Raw -or ($Arguments -contains "--raw")
-$filteredArgs = @($Arguments | Where-Object { $_ -ne "--raw" })
 
-$knownSubcommands = @("run", "dirs", "models", "stats", "session", "projects", "logs", "update-providers", "help", "login", "logout", "completion", "server")
+# Cleanly extract non-empty, non-whitespace arguments
+$filteredArgs = @()
+if ($Arguments) {
+    $filteredArgs = @($Arguments | Where-Object { $_ -ne "--raw" -and -not [string]::IsNullOrWhiteSpace($_) })
+}
 
-if ($filteredArgs.Count -gt 0) {
-    $firstArg = $filteredArgs[0]
-    if ($firstArg -notin $knownSubcommands -and $firstArg -notlike "-*") {
-        $filteredArgs = @("run") + $filteredArgs
-    } elseif ($firstArg -like "-*" -and ($filteredArgs -contains "--model" -or $filteredArgs -contains "-m")) {
-        $filteredArgs = @("run") + $filteredArgs
+# 1. INTERACTIVE TUI MODE: No prompt or arguments supplied
+if ($filteredArgs.Count -eq 0) {
+    if ($isRaw) {
+        & "C:\Users\vokov\AppData\Local\Programs\crush\crush.exe" --yolo
+    } else {
+        & edgee launch crush -- --yolo
     }
+    exit $LASTEXITCODE
+}
+
+# 2. NON-INTERACTIVE / CLI MODE: Arguments provided
+$knownSubcommands = @("run", "dirs", "models", "stats", "session", "projects", "logs", "update-providers", "help", "login", "logout", "completion", "server")
+$firstArg = $filteredArgs[0]
+
+# Auto-prepend 'run' if passing prompt text directly
+if ($firstArg -notin $knownSubcommands -and $firstArg -notlike "-*") {
+    $filteredArgs = @("run") + $filteredArgs
+} elseif ($firstArg -like "-*" -and ($filteredArgs -contains "--model" -or $filteredArgs -contains "-m")) {
+    $filteredArgs = @("run") + $filteredArgs
 }
 
 $isRun = $filteredArgs -contains "run"
@@ -52,7 +67,7 @@ if ($isRun) {
         }
     }
 } else {
-    # Interactive Crush TUI: Ensure --yolo is active for autonomous execution
+    # Interactive / root flags (e.g. --debug, --cwd): ensure --yolo is set
     if (-not ($filteredArgs -contains "--yolo" -or $filteredArgs -contains "-y")) {
         $filteredArgs = @("--yolo") + $filteredArgs
     }
@@ -65,13 +80,11 @@ if ($isRaw) {
     if ($LASTEXITCODE -ne 0 -and $isRun) {
         Write-Warning "Edgee gateway call failed (exit code $LASTEXITCODE). Falling back to local Antigravity proxy..."
         $fallbackArgs = @($filteredArgs)
-        # Replace edgee/ model with antigravity/ model if present
         for ($i = 0; $i -lt $fallbackArgs.Count; $i++) {
             if ($fallbackArgs[$i] -in @("-m", "--model") -and ($i + 1) -lt $fallbackArgs.Count) {
                 $fallbackArgs[$i + 1] = $fallbackArgs[$i + 1] -replace "^edgee/", "antigravity/"
             }
         }
-        # If no explicit model was passed, inject antigravity/gemini-3.8-flash-tiered
         if (-not ($fallbackArgs -contains "-m" -or $fallbackArgs -contains "--model")) {
             $runIdx = [array]::IndexOf($fallbackArgs, "run")
             $fallbackArgs = @($fallbackArgs[0..$runIdx]) + @("-m", "antigravity/gemini-3.8-flash-tiered") + @($fallbackArgs[($runIdx + 1)..($fallbackArgs.Count - 1)])

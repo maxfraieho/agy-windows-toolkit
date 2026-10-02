@@ -7,17 +7,25 @@ param(
 $env:GEMINI_API_KEY = $null
 $env:GOOGLE_API_KEY = $null
 
-$filteredArgs = @($Arguments)
+$filteredArgs = @()
+if ($Arguments) {
+    $filteredArgs = @($Arguments | Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+}
 
+# 1. INTERACTIVE TUI MODE: No prompt or arguments supplied
+if ($filteredArgs.Count -eq 0) {
+    & "C:\Users\vokov\AppData\Local\Programs\crush\crush.exe" --yolo
+    exit $LASTEXITCODE
+}
+
+# 2. NON-INTERACTIVE / CLI MODE: Arguments provided
 $knownSubcommands = @("run", "dirs", "models", "stats", "session", "projects", "logs", "update-providers", "help", "login", "logout", "completion", "server")
+$firstArg = $filteredArgs[0]
 
-if ($filteredArgs.Count -gt 0) {
-    $firstArg = $filteredArgs[0]
-    if ($firstArg -notin $knownSubcommands -and $firstArg -notlike "-*") {
-        $filteredArgs = @("run") + $filteredArgs
-    } elseif ($firstArg -like "-*" -and ($filteredArgs -contains "--model" -or $filteredArgs -contains "-m")) {
-        $filteredArgs = @("run") + $filteredArgs
-    }
+if ($firstArg -notin $knownSubcommands -and $firstArg -notlike "-*") {
+    $filteredArgs = @("run") + $filteredArgs
+} elseif ($firstArg -like "-*" -and ($filteredArgs -contains "--model" -or $filteredArgs -contains "-m")) {
+    $filteredArgs = @("run") + $filteredArgs
 }
 
 $isRun = $filteredArgs -contains "run"

@@ -4,4 +4,8 @@ set "GEMINI_API_KEY="
 set "GOOGLE_API_KEY="
 set "EDGEE_API_URL="
 
-powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Users\vokov\bin\crash.ps1" %*
+if "%~1"=="" (
+    powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Users\vokov\bin\crash.ps1"
+) else (
+    powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Users\vokov\bin\crash.ps1" %*
+)
