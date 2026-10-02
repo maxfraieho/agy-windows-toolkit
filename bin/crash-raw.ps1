@@ -33,7 +33,7 @@ $isRun = $filteredArgs -contains "run"
 if ($isRun) {
     if (-not ($filteredArgs -contains "-m" -or $filteredArgs -contains "--model")) {
         $runIndex = [array]::IndexOf($filteredArgs, "run")
-        $filteredArgs = @($filteredArgs[0..$runIndex]) + @("-m", "antigravity/gemini-3.8-flash-tiered") + @($filteredArgs[($runIndex + 1)..($filteredArgs.Count - 1)])
+        $filteredArgs = @($filteredArgs[0..$runIndex]) + @("-m", "antigravity/gemini-3-flash") + @($filteredArgs[($runIndex + 1)..($filteredArgs.Count - 1)])
     } else {
         for ($i = 0; $i -lt $filteredArgs.Count; $i++) {
             if ($filteredArgs[$i] -in @("-m", "--model") -and ($i + 1) -lt $filteredArgs.Count) {

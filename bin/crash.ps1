@@ -43,9 +43,9 @@ $isRun = $filteredArgs -contains "run"
 
 if ($isRun) {
     if ($isRaw -and (-not ($filteredArgs -contains "-m" -or $filteredArgs -contains "--model"))) {
-        # Default raw non-interactive mode to local antigravity gemini-3.8-flash-tiered
+        # Default raw non-interactive mode to local antigravity gemini-3-flash
         $runIndex = [array]::IndexOf($filteredArgs, "run")
-        $filteredArgs = @($filteredArgs[0..$runIndex]) + @("-m", "antigravity/gemini-3.8-flash-tiered") + @($filteredArgs[($runIndex + 1)..($filteredArgs.Count - 1)])
+        $filteredArgs = @($filteredArgs[0..$runIndex]) + @("-m", "antigravity/gemini-3-flash") + @($filteredArgs[($runIndex + 1)..($filteredArgs.Count - 1)])
     } else {
         for ($i = 0; $i -lt $filteredArgs.Count; $i++) {
             if ($filteredArgs[$i] -in @("-m", "--model") -and ($i + 1) -lt $filteredArgs.Count) {
@@ -87,7 +87,7 @@ if ($isRaw) {
         }
         if (-not ($fallbackArgs -contains "-m" -or $fallbackArgs -contains "--model")) {
             $runIdx = [array]::IndexOf($fallbackArgs, "run")
-            $fallbackArgs = @($fallbackArgs[0..$runIdx]) + @("-m", "antigravity/gemini-3.8-flash-tiered") + @($fallbackArgs[($runIdx + 1)..($fallbackArgs.Count - 1)])
+            $fallbackArgs = @($fallbackArgs[0..$runIdx]) + @("-m", "antigravity/gemini-3-flash") + @($fallbackArgs[($runIdx + 1)..($fallbackArgs.Count - 1)])
         }
         & "C:\Users\vokov\AppData\Local\Programs\crush\crush.exe" @fallbackArgs
     }

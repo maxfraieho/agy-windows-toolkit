@@ -3,7 +3,7 @@
   "models": {
     "large": {
       "provider": "antigravity",
-      "model": "gemini-3.8-flash-tiered"
+      "model": "gemini-3-flash"
     },
     "small": {
       "provider": "antigravity",
@@ -13,11 +13,11 @@
   "recent_models": {
     "large": [
       {
-        "model": "gemini-3.8-flash-tiered",
+        "model": "gemini-3-flash",
         "provider": "antigravity"
       },
       {
-        "model": "gemini-3.8-flash-tiered",
+        "model": "gemini-3-flash",
         "provider": "edgee"
       }
     ]
@@ -50,8 +50,8 @@
       "api_key": "drakon-mcp-2026",
       "models": [
         {
-          "id": "gemini-3.8-flash-tiered",
-          "name": "Gemini 3.8 Flash (High Quota)"
+          "id": "gemini-3-flash",
+          "name": "Gemini 3 Flash (Fast)"
         },
         {
           "id": "claude-sonnet-4-6",
@@ -62,8 +62,8 @@
           "name": "Claude Opus 4.6 (Thinking)"
         },
         {
-          "id": "gemini-3-flash",
-          "name": "Gemini 3 Flash (Fast)"
+          "id": "gemini-3.8-flash-tiered",
+          "name": "Gemini 3.8 Flash (High Quota)"
         }
       ]
     }
