@@ -23,11 +23,14 @@ if "%1"=="--foreground" (
     node src/index.js
 ) else (
     echo [*] Starting Antigravity Claude Proxy in background...
-    if exist "%BIN_DIR%\start-proxy.vbs" (
-        wscript.exe "%BIN_DIR%\start-proxy.vbs"
-    ) else (
-        wscript.exe "%~dp0start-proxy.vbs"
+    schtasks /run /tn AntigravityProxy >nul 2>&1
+    if %errorlevel% neq 0 (
+        if exist "%BIN_DIR%\start-proxy.vbs" (
+            wscript.exe "%BIN_DIR%\start-proxy.vbs"
+        ) else (
+            wscript.exe "%~dp0start-proxy.vbs"
+        )
     )
-    timeout /t 2 /nobreak >nul
+    ping 127.0.0.1 -n 3 >nul 2>&1
     echo [OK] Proxy launched. Web UI available at: http://localhost:8080/
 )
