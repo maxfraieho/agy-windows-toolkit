@@ -55,6 +55,9 @@ function Setup-AgyProfiles {
     Copy-Item -Path "$scriptDir\scripts\agy-switch.ps1" -Destination "$binDir\agy-switch.ps1" -Force
     Copy-Item -Path "$scriptDir\scripts\agy-me.cmd" -Destination "$binDir\agy-me.cmd" -Force
     Copy-Item -Path "$scriptDir\scripts\agy-son.cmd" -Destination "$binDir\agy-son.cmd" -Force
+    if (Test-Path "$scriptDir\scripts\codex.cmd") {
+        Copy-Item -Path "$scriptDir\scripts\codex.cmd" -Destination "$binDir\codex.cmd" -Force
+    }
 
     # Ensure PATH contains binDir
     $currentPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::User)
@@ -107,15 +110,17 @@ function Switch-Agy {
 
 function Show-AgyMenu {
     `$choices = @(
-        [System.Management.Automation.Host.ChoiceDescription]::new("&1 Me (Primary Profile)", "Switch to primary profile"),
-        [System.Management.Automation.Host.ChoiceDescription]::new("&2 Son (Secondary Profile)", "Switch to secondary profile"),
-        [System.Management.Automation.Host.ChoiceDescription]::new("&3 Status", "Show active profile")
+        [System.Management.Automation.Host.ChoiceDescription]::new("&1 Me (Primary Profile: tukroschu@gmail.com)", "Switch to primary profile"),
+        [System.Management.Automation.Host.ChoiceDescription]::new("&2 Son (Secondary Profile: arsen.k111999@gmail.com)", "Switch to secondary profile"),
+        [System.Management.Automation.Host.ChoiceDescription]::new("&3 Codex (OpenAI / ChatGPT Profile)", "Switch to codex profile"),
+        [System.Management.Automation.Host.ChoiceDescription]::new("&4 Status", "Show active profile")
     )
     `$decision = `$Host.UI.PromptForChoice("Antigravity Account Selector", "Select target profile:", `$choices, 0)
     switch (`$decision) {
         0 { Switch-Agy me }
         1 { Switch-Agy son }
-        2 { Switch-Agy status }
+        2 { Switch-Agy codex }
+        3 { Switch-Agy status }
     }
 }
 

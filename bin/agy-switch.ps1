@@ -1,6 +1,6 @@
 param(
     [Parameter(Position=0)]
-    [ValidateSet("me", "son", "status", "list")]
+    [ValidateSet("me", "son", "codex", "status", "list")]
     [string]$Target = "status"
 )
 
@@ -9,10 +9,12 @@ $baseConfig = "$userHome\.antigravity"
 $profilesDir = "$userHome\.antigravity-profiles"
 $sonDir = "$profilesDir\son"
 $meDir = "$profilesDir\me"
+$codexDir = "$profilesDir\codex"
 $cliDir = "$userHome\.gemini\antigravity-cli"
 $tokenFile = "$cliDir\antigravity-oauth-token"
 $sonToken = "$sonDir\antigravity-oauth-token"
 $meToken = "$meDir\antigravity-oauth-token"
+$codexAuth = "$userHome\.codex\auth.json"
 
 function Get-ActiveProfile {
     if (Test-Path $tokenFile) {
@@ -36,8 +38,9 @@ function Get-ActiveProfile {
     }
     if (Test-Path $baseConfig) {
         $targetPath = (Get-Item $baseConfig).Target
-        if ($targetPath -like "*\me*") { return "me (Active profile)" }
-        if ($targetPath -like "*\son*") { return "son (Secondary profile)" }
+        if ($targetPath -like "*\me*") { return "me (Primary: tukroschu@gmail.com)" }
+        if ($targetPath -like "*\son*") { return "son (Secondary: arsen.k111999@gmail.com)" }
+        if ($targetPath -like "*\codex*") { return "codex (OpenAI: arsen.k111999@gmail.com)" }
     }
     return "Not configured / Ready for login"
 }
@@ -45,7 +48,7 @@ function Get-ActiveProfile {
 if ($Target -eq "status" -or $Target -eq "list") {
     Write-Host "`n--- Antigravity Profile Status ---" -ForegroundColor Cyan
     Write-Host "Active Account: $(Get-ActiveProfile)" -ForegroundColor Yellow
-    Write-Host "Available profiles: 'me', 'son'" -ForegroundColor DarkGray
+    Write-Host "Available profiles: 'me', 'son', 'codex'" -ForegroundColor DarkGray
     Write-Host "Tip: Use /logout and /login inside 'agy' to change active Google credentials.`n" -ForegroundColor DarkGray
     return
 }
@@ -79,7 +82,7 @@ if (Test-Path $baseConfig) {
 New-Item -ItemType Junction -Path $baseConfig -Target $destPath | Out-Null
 
 # 3. Swap active token in CLI directory
-if ($Target -eq "son") {
+if ($Target -eq "son" -or $Target -eq "codex") {
     if (Test-Path $sonToken) {
         Copy-Item -Path $sonToken -Destination $tokenFile -Force
     }
@@ -105,7 +108,7 @@ if (Test-Path $proxyAccounts) {
                     break
                 }
             }
-        } elseif ($Target -eq "son") {
+        } elseif ($Target -eq "son" -or $Target -eq "codex") {
             for ($i = 0; $i -lt $accJson.accounts.Count; $i++) {
                 if ($accJson.accounts[$i].email -like "*arsen*") {
                     $accJson.activeIndex = $i
