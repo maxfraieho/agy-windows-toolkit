@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Unified Monorepo:** This repository is now integrated into the unified repository at [antigravity-claude-proxy/windows](https://github.com/maxfraieho/antigravity-claude-proxy/tree/main/windows). All active development, updates, and releases are maintained there.
+
 # Antigravity Windows Toolkit 🚀
 
 Complete turnkey automation toolkit for **Google Antigravity CLI (`agy`)**, **Charm Crush CLI (`crush`)**, and **Antigravity Claude Proxy** on Windows 10/11.
